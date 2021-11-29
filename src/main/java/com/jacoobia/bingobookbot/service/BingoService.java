@@ -37,7 +37,7 @@ public class BingoService {
     /**
      * Register the bingo bot channel for a guild
      */
-    @SubCommand("channel")
+    @SubCommand({"channel", "c"})
     public void registerChannel(String guildId, Command command) {
         guildService.setChannel(command.getGuild(), command.getChannel());
         messageSender.sendMessage(command.getChannel(), "Gotcha! This will now be the bingo channel!");
@@ -46,7 +46,7 @@ public class BingoService {
     /**
      * Start the bingo event for a guild
      */
-    @SubCommand("start")
+    @SubCommand({"start", "s"})
     public void startBingo(String guildId, Command command) {
         BingoGuild guild = getGuildById(guildId);
         guildService.startBingo(guild.getGuildId());
@@ -63,7 +63,7 @@ public class BingoService {
      * Set the name of a bingo guild
      * @param guildId the discord guild id
      */
-    @SubCommand("name")
+    @SubCommand({"name", "n"})
     public void setName(String guildId, Command command) {
         String name = StringUtils.stringArrayToString(command.getArgs(), 1);
         guildService.setBingoName(guildId, name);
@@ -73,7 +73,7 @@ public class BingoService {
      * Stop the bingo event for a guild
      * @param guildId the id of the guild
      */
-    @SubCommand("stop")
+    @SubCommand({"stop", "s"})
     public void stopBingo(String guildId, Command command) {
         BingoGuild guild = getGuildById(guildId);
         if(guild.getBingoRunning()) {
@@ -90,7 +90,7 @@ public class BingoService {
      * then looks up and adds items to a guild's bingo item list
      * @param guildId the id of the guild
      */
-    @SubCommand("add-item")
+    @SubCommand({"add-item", "ai"})
     public void addItem(String guildId, Command command) {
         BingoGuild guild = getGuildById(guildId);
 
@@ -120,7 +120,7 @@ public class BingoService {
         }
     }
 
-    @SubCommand("add-skill")
+    @SubCommand({"add-skill", "as"})
     public void addSkill(String guildId, Command command) {
         BingoGuild guild = getGuildById(guildId);
 
@@ -152,7 +152,7 @@ public class BingoService {
      * List all the items currently in a bingo item list
      * @param guildId the guild id
      */
-    @SubCommand("list-items")
+    @SubCommand({"list-items", "li"})
     public void listItems(String guildId, Command command) {
         BingoGuild guild = getGuildById(guildId);
         if(guild.getItems() != null && !guild.getItems().isEmpty()) {
@@ -165,7 +165,7 @@ public class BingoService {
         else messageSender.sendMessage(guild, "Yikes! There's no items in the bingo at the moment!");
     }
 
-    @SubCommand("list-skills")
+    @SubCommand({"list-skills", "ls"})
     public void listSkills(String guildId, Command command) {
         BingoGuild guild = getGuildById(guildId);
         if(guild.getSkills() != null && !guild.getSkills().isEmpty()) {
@@ -178,7 +178,7 @@ public class BingoService {
         else messageSender.sendMessage(guild, "Yikes! There's no skills in the bingo at the moment!");
     }
 
-    @SubCommand("list-all")
+    @SubCommand({"list-all", "la"})
     public void listAll(String guildId, Command command) {
         BingoGuild guild = getGuildById(guildId);
         List<String> items = new ArrayList<>();
@@ -210,7 +210,7 @@ public class BingoService {
     /**
      * List all the users currently registered for the bingo event
      */
-    @SubCommand("list-users")
+    @SubCommand({"list-users", "lu"})
     public void listUsers(String guildId, Command command) {
         BingoGuild guild = getGuildById(guildId);
         if(guild.getUsers() != null && !guild.getUsers().isEmpty()) {
@@ -223,7 +223,7 @@ public class BingoService {
         else messageSender.sendMessage(guild, "Uh-oh! There's no players registered for the bingo at the moment!");
     }
 
-    @SubCommand("register")
+    @SubCommand({"register", "r"})
     public void registerUser(String guildId, Command command) {
         BingoGuild guild = getGuildById(guildId);
         String discordId = command.getMember().getId();
@@ -236,7 +236,7 @@ public class BingoService {
         }
     }
 
-    @SubCommand("leave")
+    @SubCommand({"leave", "dr"})
     public void deregisterUser(String guildId, Command command) {
         BingoGuild guild = getGuildById(guildId);
         BingoUser user = userRepository.findByDiscordId(command.getMember().getId());
@@ -249,7 +249,7 @@ public class BingoService {
         guildService.deregisterUser(guild, user);
     }
 
-    @SubCommand("reset")
+    @SubCommand({"reset", "rs"})
     public void teardown(String guildId, Command command) {
         BingoGuild guild = getGuildById(guildId);
         guildService.teardown(guild);

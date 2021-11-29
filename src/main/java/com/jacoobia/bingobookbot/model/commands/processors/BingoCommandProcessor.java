@@ -1,6 +1,6 @@
 package com.jacoobia.bingobookbot.model.commands.processors;
 
-import com.jacoobia.bingobookbot.annotations.Command;
+import com.jacoobia.bingobookbot.annotations.CommandName;
 import com.jacoobia.bingobookbot.annotations.SubCommand;
 import com.jacoobia.bingobookbot.model.commands.CommandProcessor;
 import com.jacoobia.bingobookbot.model.guild.BingoGuild;
@@ -9,10 +9,11 @@ import com.jacoobia.bingobookbot.service.BingoService;
 import com.jacoobia.bingobookbot.utils.SpringContext;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-@Command("bingo")
+@CommandName("bingo")
 public class BingoCommandProcessor implements CommandProcessor {
 
     private final Map<String, Method> commands = new HashMap<>();
@@ -30,8 +31,8 @@ public class BingoCommandProcessor implements CommandProcessor {
         for(Method method : methods) {
             if (method.isAnnotationPresent(SubCommand.class)) {
                 SubCommand annotation = method.getAnnotation(SubCommand.class);
-                String methodQualifier = annotation.value();
-                commands.put(methodQualifier, method);
+                String[] qualifiers = annotation.value();
+                Arrays.stream(qualifiers).forEach(qualifier -> commands.put(qualifier, method));
             }
         }
     }
