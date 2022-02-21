@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bingo Book</title>
+
+    <link th:rel="stylesheet" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css} "/>
+    <link rel="shortcut icon" type="image/png" th:href="@{favicon.png}"/>
+    <link th:href="@{/css/general.css}" rel="stylesheet"/>
+    <link th:href="@{/css/sidebars.css}" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+
+<body>
+<main>
+    <div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark bingo-sidebar">
+        <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+            <span class="fs-4">Bingo Book</span>
+        </a>
+        <hr>
+        <ul class="nav nav-pills flex-column mb-auto" sec:authorize="isAuthenticated()">
+            <li>
+                <a href="javascript:openTab(0)" id="nav-home" class="nav-link text-white active">
+                    <i class="bi bi-house"></i>
+                    Home
+                </a>
+            </li>
+            <li>
+                <a href="javascript:openTab(1)"id="nav-servers" class="nav-link text-white">
+                    <i class="bi bi-server"></i>
+                    Servers
+                </a>
+            </li>
+            <li>
+                <a href="javascript:openTab(2)" id="nav-stats" class="nav-link text-white">
+                    <i class="bi bi-bar-chart"></i>
+                    Global Stats
+                </a>
+            </li>
+        </ul>
+        <hr>
+        <div class="btn-group dropup">
+            <div sec:authorize="isAuthenticated()">
+                <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
+                   id="user-dropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img th:src="${avatar}" alt="" width="32" height="32" class="rounded-circle me-2" src="#">
+                    <strong th:text="${username}"></strong>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="/logout">Sign out</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div sec:authorize="isAnonymous()">
+            <button type="button" class="btn btn-labeled" onclick="openAuth()">
+                <span class="btn-label"><i class="bi bi-discord"></i></span>Sign in</button>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div id="content-body" class="content-body container">
+        <div id="content-servers" class="row hidden">
+            <div class="card col-sm-6 guild-card" th:each="guild : ${guilds}">
+                <img th:src="${guild.getImageSource()}" class="card-img-top" th:alt="${guild.getGuildName()}" alt="Server Icon">
+                <div class="card-body">
+                    <p class="card-text"><span th:text="${guild.getGuildName()}"></span></p>
+                    <p class="card-text">Guild Members: <span th:text="${guild.getGuildMemberCount()}"></span></p>
+                    <p class="card-text">Bingo Active: <i th:if="${guild.bingoActive}" class="bi bi-toggle-on"></i><i th:unless="${guild.bingoActive}" class="bi bi-toggle-off"></i></p>
+                </div>
+                <button th:attr="onclick=${'clickServer('+ guild.getGuildId() +')'}" class="stretched-link hidden-link"></button>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+    <script th:src="@{/webjars/jquery/3.6.0/jquery.min.js}"></script>
+    <script th:src="@{/webjars/bootstrap/5.1.3/js/bootstrap.min.js}"></script>
+    <script th:src="@{/js/dashboard.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
+            crossorigin="anonymous">
+    </script>
+</body>
+</html>

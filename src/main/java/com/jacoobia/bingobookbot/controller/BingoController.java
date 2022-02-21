@@ -3,14 +3,17 @@ package com.jacoobia.bingobookbot.controller;
 import com.jacoobia.bingobookbot.api.messages.BingoApiResponse;
 import com.jacoobia.bingobookbot.api.messages.BingoConnectRequest;
 import com.jacoobia.bingobookbot.api.messages.BingoSubmitRequest;
-import com.jacoobia.bingobookbot.model.entities.BingoUser;
-import com.jacoobia.bingobookbot.model.guild.BingoGuild;
-import com.jacoobia.bingobookbot.model.messages.MessageSender;
-import com.jacoobia.bingobookbot.model.repository.BingoUserRepository;
+import com.jacoobia.bingobookbot.model.entities.BingoGuild;
+import com.jacoobia.bingobookbot.model.entities.User;
+import com.jacoobia.bingobookbot.model.messages.MessageSenderrr;
 import com.jacoobia.bingobookbot.service.GuildService;
+import com.jacoobia.bingobookbot.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -24,9 +27,9 @@ import java.util.Base64;
 public class BingoController {
 
     private final GuildService guildService;
-    private final MessageSender messageSender;
+    private final MessageSenderrr messageSender;
 
-    private final BingoUserRepository userRepository;
+    private final UserService userService;
 
     @PostMapping("/submit")
     public void submit(@RequestBody BingoSubmitRequest submitRequest) {
@@ -57,7 +60,7 @@ public class BingoController {
         BingoApiResponse response = new BingoApiResponse();
         BingoGuild guild = guildService.getBySecret(request.getSecret());
         if (guild != null) {
-            BingoUser user = userRepository.findByRsName(request.getUsername());
+            User user = userService.findUser(request.getUsername());
             if(user != null) {
                 response.setResponse(0);
             }

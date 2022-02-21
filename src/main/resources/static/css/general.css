@@ -1,0 +1,68 @@
+body {
+    background-color: #ffffff;
+}
+
+.center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -50px;
+    margin-left: -50px;
+}
+
+.bingo-modal-content {
+    background-color: #23272a !important;
+    color: #fff !important;
+}
+
+.btn-label {
+    position: relative;
+    left: -80px;
+    display: inline-block;
+    padding: 6px 12px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 3px 0 0 3px;
+}
+
+.btn-labeled {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.btn {
+    width: 100%;
+    background-color: #ffffff;
+    margin-bottom: 10px;
+}
+
+.btn:hover {
+    background-color: #f0f0f0;
+}
+
+.guild-card {
+    width: 18rem;
+    margin: 10px;
+    padding: 10px;
+    background-color: #23272a;
+    color: #ffffff;
+}
+
+.card-body {
+    border-top: 1px solid #ffffff;
+}
+
+.bi {
+    vertical-align: 0.125em !important;
+    width: 1em !important;
+    height: 1em !important;
+}
+
+.hidden {
+    display: none;
+}
+
+.hidden-link {
+    background: transparent;
+    border: none !important;
+    font-size:0;
+}

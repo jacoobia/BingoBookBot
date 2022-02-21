@@ -1,15 +1,22 @@
 package com.jacoobia.bingobookbot.model.messages;
 
-import com.jacoobia.bingobookbot.model.guild.BingoGuild;
+import com.jacoobia.bingobookbot.model.entities.BingoGuild;
+import com.jacoobia.bingobookbot.service.GuildService;
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 
+//Component to enforce single instance
 @Component
-public class MessageSender {
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+public class MessageSenderrr {
+
+    private final GuildService guildService;
 
     /**
      * Sends a generic string message to a {@link MessageChannel}
@@ -31,6 +38,11 @@ public class MessageSender {
         guild.getChannel().sendMessage(finalMessage).queue();
     }
 
+    public void sendMessage(String guildId, String message, Object... args) {
+        BingoGuild guild = guildService.getGuildById(guildId);
+        sendMessage(guild, message, args);
+    }
+
     /**
      * Sends a generic string message to a {@link MessageChannel}
      * @param guild the guild to send the message in
@@ -44,6 +56,11 @@ public class MessageSender {
         MessageChannel channel = guild.getChannel();
         channel.sendMessage(message).queue();
         channel.sendFile(bytes, fileName + ".png").queue();
+    }
+
+    public void sendImage(String guildId, String fileName, byte[] bytes) {
+        BingoGuild guild = guildService.getGuildById(guildId);
+        sendImage(guild, fileName, bytes);
     }
 
     public void sendImage(BingoGuild guild, String fileName, byte[] bytes) {
@@ -73,6 +90,11 @@ public class MessageSender {
         builder.setImage(payload);
         Message m = new MessageBuilder(message).setEmbed(builder.build()).build();
         guild.getChannel().sendMessage(m).queue();
+    }
+
+    public void sendPreBuiltMessage(String guildId, String message, MessageEmbed messageEmbed) {
+        BingoGuild guild = guildService.getGuildById(guildId);
+        sendPreBuiltMessage(guild.getChannel(), message, messageEmbed);
     }
 
     /**

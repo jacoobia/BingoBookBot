@@ -1,6 +1,9 @@
 package com.jacoobia.bingobookbot.model.messages;
 
 import com.jacoobia.bingobookbot.model.commands.Command;
+import com.jacoobia.bingobookbot.model.entities.BingoGuild;
+import com.jacoobia.bingobookbot.service.GuildService;
+import com.jacoobia.bingobookbot.utils.SpringContext;
 import com.jacoobia.bingobookbot.utils.StringUtils;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -8,6 +11,12 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 public class MessageHelper {
 
     private static final int MAX_ARG_COUNT = 20;
+
+    private final GuildService guildService;
+
+    public MessageHelper() {
+        guildService = SpringContext.getBean(GuildService.class);
+    }
 
     /**
      * Extracts data from a message sent in a discord text channel and then
@@ -17,6 +26,7 @@ public class MessageHelper {
      * @return a newly constructed command object
      */
     public Command parseCommand(GuildMessageReceivedEvent event) {
+        BingoGuild guild = guildService.getGuildById(event.getGuild().getId());
         Message message = event.getMessage();
         Command command = new Command();
         String commandName = splitMessage(message)[0].replace("!", StringUtils.BLANK);
@@ -25,6 +35,7 @@ public class MessageHelper {
         command.setArgs(getArgs(message));
         command.setChannel(event.getChannel());
         command.setMember(event.getMember());
+        command.setBingoGuild(guild);
         return command;
     }
 

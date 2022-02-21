@@ -1,6 +1,7 @@
 package com.jacoobia.bingobookbot.api.osrs;
 
-import com.jacoobia.bingobookbot.model.repository.BingoSkillRepository;
+import com.jacoobia.bingobookbot.model.entities.Skill;
+import com.jacoobia.bingobookbot.model.repository.SkillRepository;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -8,7 +9,7 @@ import java.util.Arrays;
 
 /**
  * Archive class, this is only for if we have some kind of issue somewhere down the line.
- * Please use {@link com.jacoobia.bingobookbot.model.entities.BingoSkill} and the {@link BingoSkillRepository} instead.
+ * Please use {@link Skill} and the {@link SkillRepository} instead.
  */
 @Getter
 @AllArgsConstructor
@@ -41,10 +42,6 @@ public enum SkillType {
     
     private final String name;
     private final String imageUrl;
-    
-    public String getImageUrl() {
-        return "" + imageUrl;
-    }
 
     public static SkillType getMatch(String name) {
         return Arrays.stream(values())

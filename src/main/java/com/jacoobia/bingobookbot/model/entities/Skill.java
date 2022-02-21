@@ -8,8 +8,8 @@ import java.io.Serializable;
 
 @Getter
 @Setter
-@Entity(name = "osrs_skill")
-public class BingoSkill implements Serializable {
+@Entity(name = "skill")
+public class Skill implements Serializable {
 
     private static final long serialVersionUID = 7122532995543295565L;
 

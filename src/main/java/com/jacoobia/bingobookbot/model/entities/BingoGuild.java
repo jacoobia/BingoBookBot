@@ -1,23 +1,19 @@
-package com.jacoobia.bingobookbot.model.guild;
+package com.jacoobia.bingobookbot.model.entities;
 
-import com.jacoobia.bingobookbot.model.entities.BingoItem;
-import com.jacoobia.bingobookbot.model.entities.BingoSkillTarget;
-import com.jacoobia.bingobookbot.model.entities.BingoUser;
+import com.jacoobia.bingobookbot.model.messages.MessageReceiver;
 import lombok.Getter;
 import lombok.Setter;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.List;
 
 @Getter
 @Setter
-@Entity(name = "bingo_guild")
-public class BingoGuild implements Serializable {
+@Entity(name = "guild")
+public class BingoGuild extends MessageReceiver {
 
     private static final long serialVersionUID = -7956087528234502234L;
 
@@ -43,25 +39,20 @@ public class BingoGuild implements Serializable {
 
     @ManyToMany
     @LazyCollection(LazyCollectionOption.FALSE)
-    @CollectionTable(name = "bingo_items")
-    private List<BingoItem> items;
+    private List<Item> items;
 
     @ManyToMany
     @LazyCollection(LazyCollectionOption.FALSE)
     @CollectionTable(name = "bingo_users")
-    private List<BingoUser> users;
+    private List<User> users;
 
-    @ManyToMany
+    @OneToMany(mappedBy = "guild")
     @LazyCollection(LazyCollectionOption.FALSE)
-    @CollectionTable(name = "bingo_skill_targets")
-    private List<BingoSkillTarget> skills;
+    private List<SkillTarget> skills;
 
     /** Transient Fields */
 
     @Transient
     private Guild guild;
-
-    @Transient
-    private MessageChannel channel;
 
 }

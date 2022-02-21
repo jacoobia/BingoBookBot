@@ -1,7 +1,7 @@
 package com.jacoobia.bingobookbot.api.osrsbox;
 
-import com.jacoobia.bingobookbot.model.entities.OsrsBoxResponse;
-import com.jacoobia.bingobookbot.model.entities.OsrsItem;
+import com.jacoobia.bingobookbot.model.entities.osrs.OsrsBoxResponse;
+import com.jacoobia.bingobookbot.model.entities.osrs.OsrsItem;
 import org.springframework.web.client.RestTemplate;
 
 public class OsrsBoxClient {
@@ -25,7 +25,7 @@ public class OsrsBoxClient {
         return lookup(name).getItems().get(0);
     }
 
-    public String loadItemImage(OsrsItem item) {
+    public static String getIconUrl(OsrsItem item) {
         return ITEM_ICON_IRL.replace("%itemId%", item.getId());
     }
 

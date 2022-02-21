@@ -8,8 +8,8 @@ import java.io.Serializable;
 
 @Getter
 @Setter
-@Entity(name = "bingo_skill_target")
-public class BingoSkillTarget implements Serializable {
+@Entity(name = "skill_target")
+public class SkillTarget implements Serializable {
 
     private static final long serialVersionUID = -773112837960042164L;
 
@@ -18,13 +18,14 @@ public class BingoSkillTarget implements Serializable {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "bingo_guild_id")
-    private String bingoGuildId;
-
     @OneToOne
-    private BingoSkill skill;
+    private Skill skill;
 
     @Column(name = "xp_target")
     private Integer xpTarget;
+
+    @ManyToOne
+    @JoinColumn(name="bingo_id", nullable=false)
+    private BingoGuild guild;
 
 }

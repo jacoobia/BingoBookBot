@@ -1,8 +1,8 @@
 package com.jacoobia.bingobookbot.utils;
 
-import com.jacoobia.bingobookbot.model.entities.BingoItem;
-import com.jacoobia.bingobookbot.model.entities.BingoSkill;
-import com.jacoobia.bingobookbot.model.entities.BingoSkillTarget;
+import com.jacoobia.bingobookbot.model.entities.Item;
+import com.jacoobia.bingobookbot.model.entities.Skill;
+import com.jacoobia.bingobookbot.model.entities.SkillTarget;
 import org.springframework.util.ResourceUtils;
 
 import javax.imageio.ImageIO;
@@ -31,13 +31,13 @@ public class BoardPainter {
     }
 
     /**
-     * Takes a {@link BingoItem} and creates a {@link BufferedImage} tile and
+     * Takes a {@link Item} and creates a {@link BufferedImage} tile and
      * adds it to the internet list of tiles ready to be painted later.
      *
      * @param item the bingo item to create a tile for
      * @return this object
      */
-    public BoardPainter add(final BingoItem item) {
+    public BoardPainter add(final Item item) {
         BufferedImage icon = ImageUtils.loadImage(item.getUrl(), false);
         if(icon != null) {
             BufferedImage tile = paintTile(icon, item.getName());
@@ -47,14 +47,14 @@ public class BoardPainter {
     }
 
     /**
-     * Takes a {@link BingoSkillTarget} and creates a {@link BufferedImage} tile and
+     * Takes a {@link SkillTarget} and creates a {@link BufferedImage} tile and
      * adds it to the internet list of tiles ready to be painted later.
      *
      * @param target the bingo target xp object to create a tile for
      * @return this object
      */
-    public BoardPainter add(final BingoSkillTarget target) {
-        BingoSkill skill = target.getSkill();
+    public BoardPainter add(final SkillTarget target) {
+        Skill skill = target.getSkill();
         BufferedImage icon = ImageUtils.loadImage("https://oldschool.runescape.wiki/images/" + skill.getImageUrl(), false);
         if(icon != null) {
             String name = StringUtils.convertShorthand(target.getXpTarget()) + " XP";

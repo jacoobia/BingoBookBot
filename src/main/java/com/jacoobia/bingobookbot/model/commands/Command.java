@@ -1,5 +1,6 @@
 package com.jacoobia.bingobookbot.model.commands;
 
+import com.jacoobia.bingobookbot.model.entities.BingoGuild;
 import lombok.Getter;
 import lombok.Setter;
 import net.dv8tion.jda.api.entities.Guild;
@@ -14,6 +15,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 @Setter
 public class Command {
 
+    private BingoGuild bingoGuild;
     private Guild guild;
     private MessageChannel channel;
     private Member member;

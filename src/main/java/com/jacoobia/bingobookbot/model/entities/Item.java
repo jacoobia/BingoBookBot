@@ -8,8 +8,8 @@ import java.io.Serializable;
 
 @Getter
 @Setter
-@Entity(name = "bingo_item")
-public class BingoItem implements Serializable {
+@Entity(name = "item")
+public class Item implements Serializable {
 
     private static final long serialVersionUID = 7122532995543295565L;
 
@@ -20,6 +20,9 @@ public class BingoItem implements Serializable {
 
     @Column(name = "name")
     private String name;
+
+    @Column(name = "osrs_id")
+    private Integer osrsId;
 
     @Column(name = "url")
     private String url;

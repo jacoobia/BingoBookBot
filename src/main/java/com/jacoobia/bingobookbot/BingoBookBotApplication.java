@@ -7,6 +7,8 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.ChunkingFilter;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -24,12 +26,16 @@ public class BingoBookBotApplication {
         try {
             EnumSet<GatewayIntent> intents = EnumSet.of(
                     GatewayIntent.GUILD_MESSAGES,
-                    GatewayIntent.GUILD_VOICE_STATES);
+                    GatewayIntent.GUILD_VOICE_STATES,
+                    GatewayIntent.GUILD_MEMBERS,
+                    GatewayIntent.GUILD_WEBHOOKS);
 
             jda = JDABuilder.createLight(args[0], intents)
                     .setActivity(Activity.watching("Castle Wars"))
                     .setStatus(OnlineStatus.DO_NOT_DISTURB)
                     .enableCache(CacheFlag.VOICE_STATE)
+                    .setChunkingFilter(ChunkingFilter.ALL)
+                    .setMemberCachePolicy(MemberCachePolicy.ALL)
                     .build();
 
             registerEvents();

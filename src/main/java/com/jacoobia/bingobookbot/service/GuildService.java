@@ -1,14 +1,11 @@
 package com.jacoobia.bingobookbot.service;
 
-import com.jacoobia.bingobookbot.model.entities.BingoItem;
-import com.jacoobia.bingobookbot.model.entities.BingoSkillTarget;
-import com.jacoobia.bingobookbot.model.entities.BingoUser;
-import com.jacoobia.bingobookbot.model.guild.BingoGuild;
-import com.jacoobia.bingobookbot.model.messages.MessageSender;
-import com.jacoobia.bingobookbot.model.repository.BingoGuildRepository;
+import com.jacoobia.bingobookbot.model.entities.*;
+import com.jacoobia.bingobookbot.model.repository.GuildRepository;
 import com.jacoobia.bingobookbot.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +21,7 @@ public class GuildService {
 
     private static final int SECRET_LENGTH = 6;
 
-    private final BingoGuildRepository bingoGuildRepository;
-    private final MessageSender messageSender;
+    private final GuildRepository guildRepository;
 
     /**
      * Enter a guild into the active guilds registry
@@ -35,7 +31,7 @@ public class GuildService {
         String id = guild.getId();
 
         if (!ACTIVE_GUILDS.containsKey(id)) {
-            BingoGuild bingoGuild = bingoGuildRepository.getBingoGuildByGuildId(id);
+            BingoGuild bingoGuild = guildRepository.getBingoGuildByGuildId(id);
             if(bingoGuild == null) {
                 bingoGuild = new BingoGuild();
                 bingoGuild.setGuildId(id);
@@ -44,7 +40,7 @@ public class GuildService {
             if(bingoGuild.getChannelId() != null)
                 bingoGuild.setChannel(guild.getTextChannelById(bingoGuild.getChannelId()));
             bingoGuild.setGuild(guild);
-            bingoGuildRepository.save(bingoGuild);
+            guildRepository.save(bingoGuild);
             ACTIVE_GUILDS.put(id, bingoGuild);
         }
     }
@@ -55,15 +51,6 @@ public class GuildService {
      */
     public void deregisterGuild(BingoGuild guild) {
         ACTIVE_GUILDS.remove(guild.getGuildId());
-    }
-
-    /**
-     * Gets a {@link BingoGuild} object from the discord guild ID
-     * @param id the discord guild id
-     * @return the BingoGuild object
-     */
-    public BingoGuild getGuildById(String id) {
-        return ACTIVE_GUILDS.get(id);
     }
 
     /**
@@ -101,36 +88,44 @@ public class GuildService {
         bingoGuild.setChannelId(channel.getId());
 
         //Save the guild
-        bingoGuildRepository.save(bingoGuild);
+        guildRepository.save(bingoGuild);
+        bingoGuild.sendMessage("Gotcha! This will now be the bingo channel!");
     }
 
     /**
      * Add items to a guild's bingo board item list
-     * @param guild the guild to add an item to
+     * @param guildId the id of the guild to add an item to
      * @param item the item to add
      * @return was it successful
      */
-    public boolean addItem(BingoGuild guild, BingoItem item) {
-        List<BingoItem> items = new ArrayList<>();
+    public boolean addItem(String guildId, Item item) {
+        BingoGuild guild = getGuildById(guildId);
+        List<Item> items = new ArrayList<>();
         if(guild.getItems() != null) items.addAll(guild.getItems());
 
         if(!items.contains(item)) {
             items.add(item);
             guild.setItems(items);
-            bingoGuildRepository.save(guild);
+            guildRepository.save(guild);
             return true;
         }
         return false;
     }
 
-    public boolean addSkill(BingoGuild guild, BingoSkillTarget target) {
-        List<BingoSkillTarget> targets = new ArrayList<>();
+    /**
+     * Adds a new {@link SkillTarget} to a guild's skill list 
+     * @param guild the guild to add to
+     * @param target the target 
+     * @return was it successful
+     */
+    public boolean addSkill(BingoGuild guild, SkillTarget target) {
+        List<SkillTarget> targets = new ArrayList<>();
         if(guild.getItems() != null) targets.addAll(guild.getSkills());
 
         if(!targets.contains(target)) {
             targets.add(target);
             guild.setSkills(targets);
-            bingoGuildRepository.save(guild);
+            guildRepository.save(guild);
             return true;
         }
         return false;
@@ -144,60 +139,67 @@ public class GuildService {
     public void setBingoName(String guildId, String name) {
         BingoGuild bingoGuild = getGuildById(guildId);
         if(bingoGuild.getBingoRunning()) {
-            messageSender.sendMessage(bingoGuild, "The bingo event %s is already active!", bingoGuild.getBingoName());
+            bingoGuild.sendMessage("The bingo event %s is already active!", bingoGuild.getBingoName());
             return;
         }
         bingoGuild.setBingoName(name);
-        bingoGuildRepository.save(bingoGuild);
-        messageSender.sendMessage(bingoGuild, "You have set the Bingo event name to `%s`", name);
+        guildRepository.save(bingoGuild);
+        bingoGuild.sendMessage("You have set the Bingo event name to `%s`", name);
     }
 
-    public void startBingo(String guildId) {
-        BingoGuild bingoGuild = getGuildById(guildId);
-        if(bingoGuild.getBingoRunning()) {
-            messageSender.sendMessage(bingoGuild, "The bingo event %s is already active!", bingoGuild.getBingoName());
+    /**
+     * 
+     * @param guild
+     */
+    public void startBingo(BingoGuild guild) {
+        if(guild.getBingoRunning()) {
+            guild.sendMessage("The bingo event %s is already active!", guild.getBingoName());
             return;
         }
-        bingoGuild.setBingoRunning(true);
-        bingoGuild.setSecret(RandomStringUtils.randomAlphanumeric(SECRET_LENGTH));
-        bingoGuildRepository.save(bingoGuild);
-        messageSender.sendMessage(bingoGuild, "Hey @everyone!\\nThe Bingo event %s is now live! Good luck to all!\\nThe secret key is: `%s`\\nGenerating board...", bingoGuild.getBingoName(), bingoGuild.getSecret());
+        guild.setBingoRunning(true);
+        guild.setSecret(RandomStringUtils.randomAlphanumeric(SECRET_LENGTH));
+        guildRepository.save(guild);
+        guild.sendMessage("Hey @everyone!\\nThe Bingo event %s is now live! Good luck to all!\\nThe secret key is: `%s`\\nGenerating board...", guild.getBingoName(), guild.getSecret());
     }
 
+    /**
+     * 
+     * @param guildId
+     */
     public void stopBingo(String guildId) {
         BingoGuild bingoGuild = getGuildById(guildId);
         bingoGuild.setBingoRunning(false);
         //bingoGuild.setItems(Collections.emptyList());
         bingoGuild.setBingoName(null);
-        bingoGuildRepository.save(bingoGuild);
+        guildRepository.save(bingoGuild);
     }
 
-    public void deregisterUser(BingoGuild guild, BingoUser user) {
+    public void deregisterUser(BingoGuild guild, User user) {
         if(!isUserRegistered(guild, user)) {
-            messageSender.sendMessage(guild, "You're not registered for the next bingo event, %s!", user.getRsName());
+            guild.sendMessage("You're not registered for the next bingo event, %s!", user.getRsName());
             return;
         }
 
-        List<BingoUser> users = getGuildUsers(guild);
+        List<User> users = getRegisteredUsers(guild);
 
         users.remove(user);
         guild.setUsers(users);
-        bingoGuildRepository.save(guild);
-        messageSender.sendMessage(guild, "Gotcha! You're no longer registered for the next bingo event, %s!", user.getRsName());
+        guildRepository.save(guild);
+        guild.sendMessage("Gotcha! You're no longer registered for the next bingo event, %s!", user.getRsName());
     }
 
-    public void registerUser(BingoGuild guild, BingoUser user) {
+    public void registerUser(BingoGuild guild, User user) {
         if(isUserRegistered(guild, user)) {
-            messageSender.sendMessage(guild, "You're already registered for this bingo, %s!", user.getRsName());
+            guild.sendMessage("You're already registered for this bingo, %s!", user.getRsName());
             return;
         }
 
-        List<BingoUser> users = getGuildUsers(guild);
+        List<User> users = getRegisteredUsers(guild);
 
         users.add(user);
         guild.setUsers(users);
-        bingoGuildRepository.save(guild);
-        messageSender.sendMessage(guild, "Gotcha! You've registered to join the bingo, %s!", user.getRsName());
+        guildRepository.save(guild);
+        guild.sendMessage("Gotcha! You've registered to join the bingo, %s!", user.getRsName());
     }
 
     public void teardown(BingoGuild guild) {
@@ -206,12 +208,12 @@ public class GuildService {
         guild.setBingoRunning(false);
         guild.setItems(Collections.emptyList());
         guild.setUsers(Collections.emptyList());
-        bingoGuildRepository.save(guild);
+        guildRepository.save(guild);
     }
 
-    private boolean isUserRegistered(BingoGuild guild, BingoUser user) {
-        List<BingoUser> users = getGuildUsers(guild);
-        for(BingoUser bingoUser : users) {
+    private boolean isUserRegistered(BingoGuild guild, User user) {
+        List<User> users = getRegisteredUsers(guild);
+        for(User bingoUser : users) {
             if(bingoUser.getDiscordId().equalsIgnoreCase(user.getDiscordId())
             || bingoUser.getRsName().equalsIgnoreCase(user.getRsName()))
                 return true;
@@ -219,11 +221,46 @@ public class GuildService {
         return false;
     }
 
-    private List<BingoUser> getGuildUsers(BingoGuild guild) {
-        List<BingoUser> users = new ArrayList<>();
+    /**
+     * Gets all the suers currently associated to a guild with a given ID
+     * @param guild the guild
+     * @return the list of users
+     */
+    private List<User> getRegisteredUsers(BingoGuild guild) {
+        List<User> users = new ArrayList<>();
         if(guild.getUsers() != null)
             users.addAll(guild.getUsers());
         return users;
+    }
+
+    public void clearSkillTargets(Guild guild) {
+        BingoGuild bingoGuild = getGuildById(guild.getId());
+        int count = bingoGuild.getSkills().size();
+        bingoGuild.setSkills(Collections.emptyList());
+        guildRepository.save(bingoGuild);
+        bingoGuild.sendMessage("Cleared out %s skills from the bingo event!", count);
+    }
+
+    /**
+     * Gets a {@link BingoGuild} object from the discord guild ID
+     * @param id the discord guild id
+     * @return the BingoGuild object
+     */
+    public BingoGuild getGuildById(String id) {
+        return ACTIVE_GUILDS.get(id);
+    }
+
+    public List<BingoGuild> getGuildsUserIsIn(String userId) {
+        List<BingoGuild> guilds = new ArrayList<>();
+        for (BingoGuild guild : ACTIVE_GUILDS.values()) {
+            List<Member> members = guild.getGuild().getMembers();
+            for (Member member : members) {
+                if (member.getId().equalsIgnoreCase(userId)) {
+                    guilds.add(guild);
+                }
+            }
+        }
+        return guilds;
     }
 
 }

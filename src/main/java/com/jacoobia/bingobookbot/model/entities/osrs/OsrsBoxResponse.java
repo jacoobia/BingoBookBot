@@ -1,4 +1,4 @@
-package com.jacoobia.bingobookbot.model.entities;
+package com.jacoobia.bingobookbot.model.entities.osrs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;

@@ -2,10 +2,9 @@ package com.jacoobia.bingobookbot.model.commands.processors;
 
 import com.jacoobia.bingobookbot.annotations.CommandName;
 import com.jacoobia.bingobookbot.annotations.SubCommand;
+import com.jacoobia.bingobookbot.model.commands.Command;
 import com.jacoobia.bingobookbot.model.commands.CommandProcessor;
-import com.jacoobia.bingobookbot.model.guild.BingoGuild;
-import com.jacoobia.bingobookbot.model.messages.MessageSender;
-import com.jacoobia.bingobookbot.service.BingoService;
+import com.jacoobia.bingobookbot.model.entities.BingoGuild;
 import com.jacoobia.bingobookbot.utils.SpringContext;
 
 import java.lang.reflect.Method;
@@ -13,19 +12,20 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Processes the !bingo commands and pushes it along the line
+ * to the relevant subcommand using reflection.
+ */
 @CommandName("bingo")
 public class BingoCommandProcessor implements CommandProcessor {
 
     private final Map<String, Method> commands = new HashMap<>();
-
-    private final BingoService bingoService;
-    private final MessageSender messageSender;
+    private final BingoSubCommandProcessor bingoSubCommandProcessor;
 
     public BingoCommandProcessor() {
-        bingoService = SpringContext.getBean(BingoService.class);
-        messageSender = SpringContext.getBean(MessageSender.class);
+        bingoSubCommandProcessor = SpringContext.getBean(BingoSubCommandProcessor.class);
 
-        Class<? extends BingoService> clazz = bingoService.getClass();
+        Class<? extends BingoSubCommandProcessor> clazz = bingoSubCommandProcessor.getClass();
         Method[] methods = clazz.getMethods();
 
         for(Method method : methods) {
@@ -38,19 +38,18 @@ public class BingoCommandProcessor implements CommandProcessor {
     }
 
     @Override
-    public void process(com.jacoobia.bingobookbot.model.commands.Command command) {
-        String guildId = command.getGuild().getId();
-        BingoGuild bingoGuild = bingoService.getGuildById(guildId);
+    public void process(Command command) {
+        BingoGuild bingoGuild = command.getBingoGuild();
 
-        if(bingoGuild == null || !checkChannel(bingoGuild, command.getArgs()[0])) {
-            messageSender.sendMessage(command.getChannel(), "Something when fetching your guild details. Please register the Bingo text channel with `!bingo channel` to fix this.");
+        if(!checkChannel(bingoGuild, command.getArgs()[0])) {
+            command.getChannel().sendMessage("Something when fetching your guild details. Please register the Bingo text channel with `!bingo channel` to fix this.").queue();
             return;
         }
 
         try {
             for (String qualifier : commands.keySet()) {
                 if (qualifier.equalsIgnoreCase(command.getArgs()[0])) {
-                    commands.get(qualifier).invoke(bingoService, guildId, command);
+                    commands.get(qualifier).invoke(bingoSubCommandProcessor, command);
                 }
             }
         } catch (Exception e) {
@@ -59,6 +58,8 @@ public class BingoCommandProcessor implements CommandProcessor {
     }
 
     private boolean checkChannel(BingoGuild bingoGuild, String subCommand) {
+        if(bingoGuild == null)
+            return false;
         if(!subCommand.equalsIgnoreCase("channel")) {
             return bingoGuild.getChannel() != null && bingoGuild.getChannelId() != null;
         }
