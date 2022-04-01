@@ -10,7 +10,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private static final String[] ANON_PERMITTED = { "/index", "/", "/webjars/**", "/css/**", "/img/**", "/js/**", "/favicon.ico", "/bingo/**"};
